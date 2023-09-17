@@ -1,5 +1,6 @@
 package ru.bebriki.northformat.controllers;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -67,4 +68,37 @@ public class FileController {
                 .body(new ByteArrayResource(fileEntity.getData()));
     }
 
+    @Transactional
+    @PostMapping("/overwriting/{id}")
+    public ResponseEntity<String> overwriting(@RequestParam("text") String text, @PathVariable Long id) throws FileNotFoundException{
+        try{
+            File fileEntity = fileRepository.findById(id).orElseThrow(
+                    ()-> new FileNotFoundException("There is no file with id:" + id)
+            );
+            byte[] newText = text.getBytes();
+            fileEntity.setData(newText);
+            fileRepository.save(fileEntity);
+            return ResponseEntity.ok("File overwriting successfully");
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to overwriting file");
+        }
+    }
+
+    @Transactional
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> work(@RequestParam("text") String text, @PathVariable Long id) throws FileNotFoundException{
+        try{
+            overwriting(text,id);
+            readFile(id);
+            Long time = (System.currentTimeMillis()/1000)/60;
+            while((System.currentTimeMillis()/1000)/60-time<60) continue;
+            File fileEntity = fileRepository.findById(id).orElseThrow(
+                    ()-> new FileNotFoundException("There is no file with id:" + id)
+            );
+            fileRepository.delete(fileEntity);
+            return ResponseEntity.ok("File delete successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete file");
+        }
+    }
 }
