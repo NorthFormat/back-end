@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -18,6 +20,8 @@ public class File {
 
     @Column(nullable = false)
     private String fileName;
+    @Column
+    private LocalDateTime dateCreation;
 
     @Lob
     @Column(nullable = false)
