@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -16,12 +15,7 @@ import ru.bebriki.northformat.entities.File;
 import ru.bebriki.northformat.errors.FileNotFoundException;
 import ru.bebriki.northformat.repositories.FileRepository;
 
-import javax.management.Query;
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.security.Timestamp;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -113,26 +107,8 @@ public class FileController {
     @Transactional
     @PutMapping("/work/{id}")
     public ResponseEntity<byte[]> work(@RequestParam("text") String text, @PathVariable Long id) throws FileNotFoundException{
-//        try{
             overwriting(text,id);
-//            Long time = (System.currentTimeMillis()/1000)/60;
-//            while((System.currentTimeMillis()/1000)/60-time<60) continue;
-//            ActionListener taskPerformer = new ActionListener() {
-//                @Override public void actionPerformed(ActionEvent evt) {
-//                    try {
-//                        delete(id);
-//                    } catch (FileNotFoundException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            };
-//            Timer tim=new Timer(3600000, taskPerformer);
-//            tim.start();
-//            tim.setRepeats(false);
             return readFile(id);
-//        }catch (Exception e){
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed work with file");
-//        }
     }
 
     @DeleteMapping("/delete/{id}")
