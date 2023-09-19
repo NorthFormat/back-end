@@ -30,7 +30,7 @@ public class FileController {
     private final FileRepository fileRepository;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<byte[]> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             File fileEntity = new File();
             fileEntity.setFileName(file.getOriginalFilename());
@@ -39,9 +39,9 @@ public class FileController {
             LocalDateTime time = LocalDateTime.now(clock);
             fileEntity.setDateCreation(time);
             fileRepository.save(fileEntity);
-            return ResponseEntity.ok("File uploaded successfully");
+            return readFile(fileEntity);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload file");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -51,6 +51,20 @@ public class FileController {
         File fileEntity = fileRepository.findById(id).orElseThrow(
                 () -> new FileNotFoundException("There is no file with id: " + id)
         );
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(fileEntity.getFileName())
+                .build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileEntity.getData());
+
+    }
+
+    private ResponseEntity<byte[]> readFile(File fileEntity) throws FileNotFoundException {
 
         HttpHeaders headers = new HttpHeaders();
 
