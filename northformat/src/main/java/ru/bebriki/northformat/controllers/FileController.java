@@ -25,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/files")
 @RequiredArgsConstructor
+@CrossOrigin
 public class FileController {
 
     private final FileRepository fileRepository;
