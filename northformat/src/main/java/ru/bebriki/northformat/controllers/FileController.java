@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-
 
 @EnableScheduling
 @RestController
@@ -32,8 +30,8 @@ public class FileController {
     private final FileRepository fileRepository;
 
     @Transactional
-    @PostMapping("/decode")
-    public ResponseEntity<byte[]> decodeFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/upload")
+    public ResponseEntity<byte[]> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
 
             File fileEntity = File.builder().fileName(file.getOriginalFilename())
@@ -41,32 +39,12 @@ public class FileController {
                     .data(file.getBytes())
                     .build();
 
+            fileRepository.save(fileEntity);
+
             return readFile(fileEntity);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new byte[]{});
         }
-    }
-
-    @Transactional
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(String text) {
-
-        File file = File.builder()
-                .fileName(UUID.randomUUID() + ".txt")
-                .dateCreation(LocalDateTime.now(Clock.systemUTC()))
-                .data(text.getBytes())
-                .build();
-
-        fileRepository.save(file);
-
-        return new ResponseEntity<>(file.getFileName(), HttpStatus.OK);
-
-    }
-
-    @Transactional
-    @GetMapping
-    public ResponseEntity<File> getFileByName(@RequestParam("fileName") String fileName) {
-        return new ResponseEntity<>(fileRepository.findFileByFileName(fileName), HttpStatus.OK);
     }
 
     @GetMapping("/read/{id}")
